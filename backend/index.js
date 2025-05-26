@@ -1,26 +1,46 @@
-// backend/index.js (or wherever your main app file is)
+require('dotenv').config({ path: '.env.local' });
 const express = require('express');
-const app = express();
+const helmet = require('helmet');
+const cors = require('cors');
+const compression = require('compression');
+const morgan = require('morgan');
+const { requestLogger } = require('./src/middleware/logger');
+const errorHandler = require('./src/middleware/errorHandler');
 const { Pool } = require('pg');
 
-const pool = new Pool({
-  host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT, 10), // Parse the port from environment variable
-  user: process.env.POSTGRES_USERNAME, // Use the names from your .env file
-  password: process.env.POSTGRES_PASSWORD, // Use the names from your .env file
-  database: process.env.POSTGRES_DATABASE_NAME, // Use the names from your .env file
-});
+const app = express();
 
-pool.query('SELECT NOW()', (err, res) => {
-  if (err) {
-    console.error('Database connection error:', err);
-  } else {
-    console.log('Postgres time:', res.rows[0]);
-  }
-});
+// Security middleware
+app.use(helmet());
+app.use(cors());
 
-app.get('/', (req, res) => {
-  res.send('Hello from Express in Docker!');
+// Body parser
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Compression
+app.use(compression());
+
+// Logging
+app.use(morgan('dev'));
+app.use(requestLogger);
+
+// Routes
+const unitsRouter = require('./src/routes/v1/units');
+const bookingsRouter = require('./src/routes/v1/bookings');
+
+app.use('/api/v1/units', unitsRouter);
+app.use('/api/v1/bookings', bookingsRouter);
+
+// Error handling
+app.use(errorHandler);
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    status: 'error',
+    message: 'Route not found'
+  });
 });
 
 const PORT = process.env.PORT || 3000;
