@@ -1,7 +1,7 @@
 
 services:
   postgres:
-    image: postgres:14
+    image: postgres:15
     container_name: postgres-container
     restart: unless-stopped
     ports:
@@ -35,7 +35,7 @@ services:
     volumes:
       - ./backend:/app
     env_file:
-      - ./.env
+      - ./.env.docker
     environment:
       DB_HOST: postgres
       DB_PORT: 5432
