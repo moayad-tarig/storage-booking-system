@@ -1,0 +1,16 @@
+.env 
+
+# Backend ignores
+/backend/node_modules/
+/backend/vendor/
+/backend/storage/
+/backend/.env
+
+# Frontend ignores
+/frontend/node_modules/
+/frontend/.next/
+/frontend/.env.local
+
+# macOS
+.DS_Store
+
