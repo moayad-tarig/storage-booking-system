@@ -7,7 +7,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { api } from "@/services/api";
-import { validateBookingForm, formatPhoneNumber } from "@/utils/bookingValidation";
+import { validateBookingForm } from "@/utils/bookingValidation";
 import UnitDetailsCard from "@/components/UnitDetailsCard";
 import BookingForm from "@/components/BookingForm";
 import toast from "react-hot-toast";
@@ -24,8 +24,6 @@ const BookUnitContent = () => {
   const [endDate, setEndDate] = useState();
   const [formData, setFormData] = useState({
     customerName: "",
-    customerEmail: "",
-    customerPhone: "",
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -59,14 +57,7 @@ const BookUnitContent = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-
-    if (name === "customerPhone") {
-      const formatted = formatPhoneNumber(value);
-      setFormData((prev) => ({ ...prev, [name]: formatted }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
-
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: undefined }));
     }
@@ -74,10 +65,13 @@ const BookUnitContent = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('Form submission started');
 
     if (!validateForm()) {
+      console.log('Form validation failed:', errors);
       return;
     }
+    console.log('Form validation passed');
 
     try {
       setIsSubmitting(true);
@@ -90,13 +84,22 @@ const BookUnitContent = () => {
         endDate: endDate.toISOString()
       };
 
-      await api.createBooking(bookingData);
+      console.log('Form data:', formData);
+      console.log('Selected unit:', selectedUnit);
+      console.log('Start date:', startDate);
+      console.log('End date:', endDate);
+      console.log('Submitting booking data:', bookingData);
+
+      const response = await api.createBooking(bookingData);
+      console.log('Booking response:', response);
+      
       toast.success('Booking confirmed successfully!');
       
       setTimeout(() => {
         router.push("/bookings");
       }, 2000);
     } catch (err) {
+      console.error('Booking error:', err);
       toast.error(err.message);
       setError(err.message);
     } finally {

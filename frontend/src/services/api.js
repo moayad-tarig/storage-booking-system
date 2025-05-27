@@ -1,4 +1,4 @@
-const API_BASE_URL = '/api/v1';
+const API_BASE_URL = 'http://127.0.0.1:3000/api/v1';
 
 export const api = {
   // Units
@@ -70,6 +70,7 @@ export const api = {
 
   createBooking: async (bookingData) => {
     try {
+      console.log('API: Creating booking with data:', bookingData);
       const response = await fetch(`${API_BASE_URL}/bookings`, {
         method: 'POST',
         headers: {
@@ -79,21 +80,32 @@ export const api = {
         body: JSON.stringify(bookingData),
       });
       
+      console.log('API: Response status:', response.status);
+      console.log('API: Response headers:', Object.fromEntries(response.headers.entries()));
+      
       if (!response.ok) {
-        if (response.headers.get('content-type')?.includes('application/json')) {
+        const contentType = response.headers.get('content-type');
+        console.log('API: Error response content type:', contentType);
+        
+        if (contentType?.includes('application/json')) {
           const error = await response.json();
+          console.log('API: Error response body:', error);
           if (error.message?.includes('already booked')) {
             throw new Error('This unit is already booked for the selected dates. Please choose different dates.');
           }
           throw new Error(error.message || 'Failed to create booking');
         } else {
+          const text = await response.text();
+          console.log('API: Error response text:', text);
           throw new Error('Server error occurred');
         }
       }
       
-      return response.json();
+      const data = await response.json();
+      console.log('API: Success response:', data);
+      return data;
     } catch (error) {
-      console.error('Error creating booking:', error);
+      console.error('API: Error creating booking:', error);
       throw error;
     }
   },

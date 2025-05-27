@@ -41,25 +41,6 @@ const BookingForm = ({
             )}
           </div>
 
-          <div>
-            <Label htmlFor="customerEmail">Email Address *</Label>
-            <Input
-              id="customerEmail"
-              name="customerEmail"
-              type="email"
-              value={formData.customerEmail}
-              onChange={onFormDataChange}
-              placeholder="Enter your email"
-              className={errors.customerEmail ? "border-red-500" : ""}
-              disabled={isSubmitting}
-            />
-            {errors.customerEmail && (
-              <p className="text-red-500 text-sm mt-1">{errors.customerEmail}</p>
-            )}
-          </div>
-
-       
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label>Start Date *</Label>
