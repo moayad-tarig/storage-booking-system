@@ -54,10 +54,11 @@ const validateUnitFilters = [
 const validateRequest = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ 
-      status: 'fail',
-      errors: errors.array() 
-    });
+    const error = new Error('Validation failed');
+    error.name = 'ValidationError';
+    error.statusCode = 400;
+    error.errors = errors.array();
+    return next(error);
   }
   next();
 };
