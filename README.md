@@ -1,24 +1,122 @@
-# Storage Booking System Backend
+# Storage Booking System
 
-A RESTful API for managing storage unit bookings, built with Node.js, Express, and PostgreSQL.
+A full-stack application for managing storage unit bookings, built with Next.js, Node.js, Express, and PostgreSQL.
 
 ## Features
 
-- RESTful API endpoints for storage unit management
+- Browse available storage units
 - Filter units by location and size
-- Booking management with conflict prevention
-- Input validation and error handling
-- Request logging and monitoring
-- PostgreSQL database with Knex.js ORM
+- Book storage units with date selection
+- View and manage bookings
+- Responsive design with modern UI
+- Real-time availability checking
 
 ## Tech Stack
 
+### Frontend
+- Next.js 14
+- React
+- Tailwind CSS
+- Shadcn UI Components
+- React Hot Toast
+
+### Backend
 - Node.js + Express
 - PostgreSQL
 - Knex.js (SQL query builder)
 - Docker
 - Winston (logging)
 - Express Validator
+
+## Prerequisites
+
+- Node.js (v18 or higher)
+- Docker and Docker Compose
+- npm or yarn
+
+## Project Structure
+
+```
+storage-booking-system/
+├── frontend/          # Next.js frontend application
+├── backend/           # Express.js backend API
+└── README.md
+```
+
+## Setup and Installation
+
+### 1. Clone the Repository
+```bash
+git clone <repository-url>
+cd storage-booking-system
+```
+
+### 2. Backend Setup
+
+#### Create Environment Files
+Create `.env.local` in the backend directory:
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=postgres
+DB_NAME=storage_booking
+NODE_ENV=development
+```
+
+#### Install Dependencies
+```bash
+cd backend
+npm install
+```
+
+#### Start PostgreSQL with Docker
+```bash
+# Start PostgreSQL container
+docker run --name storage-booking-db \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=storage_booking \
+  -p 5432:5432 \
+  -d postgres:latest
+```
+
+#### Run Database Migrations and Seeds
+```bash
+# Run migrations to create database tables
+npx knex migrate:latest
+
+# Seed the database with initial data
+npx knex seed:run
+```
+
+#### Start Backend Server
+```bash
+npm run dev
+```
+
+The backend server will start on http://localhost:3000
+
+### 3. Frontend Setup
+
+#### Create Environment File
+Create `.env.local` in the frontend directory:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3000/api/v1
+```
+
+#### Install Dependencies
+```bash
+cd frontend
+npm install
+```
+
+#### Start Frontend Development Server
+```bash
+npm run dev
+```
+
+The frontend application will start on http://localhost:3001
 
 ## API Endpoints
 
@@ -43,135 +141,52 @@ A RESTful API for managing storage unit bookings, built with Node.js, Express, a
   - Query Parameters:
     - `userName` (required): Filter bookings by user name
 
-## Database Schema
-
-### Storage Units
-```sql
-CREATE TABLE storage_units (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR NOT NULL,
-  size VARCHAR NOT NULL,
-  location VARCHAR NOT NULL,
-  price_per_day DECIMAL(10,2) NOT NULL,
-  is_available BOOLEAN DEFAULT true,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-### Bookings
-```sql
-CREATE TABLE bookings (
-  id SERIAL PRIMARY KEY,
-  user_name VARCHAR NOT NULL,
-  unit_id INTEGER REFERENCES storage_units(id) ON DELETE CASCADE,
-  start_date DATE NOT NULL,
-  end_date DATE NOT NULL,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-## Setup and Installation
-
-1. Clone the repository:
-   ```bash
-   git clone <repository-url>
-   cd storage-booking-system/backend
-   ```
-
-2. Create `.env.docker` file:
-   ```
-   POSTGRES_USERNAME=postgres
-   POSTGRES_PASSWORD=postgres
-   POSTGRES_DATABASE_NAME=storage_booking
-   DB_USERNAME=postgres
-   DB_PASSWORD=postgres
-   DB_NAME=storage_booking
-   NODE_ENV=development
-   ```
-
-3. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-4. Start the application using Docker:
-   ```bash
-   docker-compose up -d
-   ```
-
-5. Run database migrations:
-   ```bash
-   npm run migrate:latest
-   ```
-
-6. Seed the database (optional):
-   ```bash
-   npm run seed
-   ```
-
 ## Development
 
-Start the development server:
+### Backend Development
 ```bash
+cd backend
 npm run dev
 ```
 
-## API Response Format
-
-### Success Response
-```json
-{
-  "status": "success",
-  "data": {
-    // Response data
-  }
-}
+### Frontend Development
+```bash
+cd frontend
+npm run dev
 ```
 
-### Error Response
-```json
-{
-  "status": "fail",
-  "error": {
-    "statusCode": 400,
-    "status": "fail",
-    "isOperational": true
-  },
-  "message": "Error message"
-}
+### Database Management
+```bash
+# View database logs
+docker logs storage-booking-db
+
+# Access database shell
+docker exec -it storage-booking-db psql -U postgres -d storage_booking
+
+# Reset database (if needed)
+docker rm -f storage-booking-db
+# Then follow the database setup steps again
 ```
 
-## Error Handling
+## Troubleshooting
 
-- Input validation using express-validator
-- Custom error handling middleware
-- Proper HTTP status codes
-- Detailed error messages
-- Request logging with Winston
+1. **Database Connection Issues**
+   - Ensure PostgreSQL container is running: `docker ps`
+   - Check database logs: `docker logs storage-booking-db`
+   - Verify environment variables in `.env.local`
 
-## Security Features
+2. **Migration/Seed Issues**
+   - Drop and recreate database if needed:
+     ```bash
+     docker exec -it storage-booking-db psql -U postgres -c "DROP DATABASE storage_booking;"
+     docker exec -it storage-booking-db psql -U postgres -c "CREATE DATABASE storage_booking;"
+     ```
+   - Run migrations and seeds again
 
-- Input validation and sanitization
-- SQL injection prevention using Knex.js
-- Proper error handling to prevent information leakage
-- Request logging for debugging and monitoring
-
-## Project Structure
-
-```
-backend/
-├── src/
-│   ├── controllers/    # Route controllers
-│   ├── services/       # Business logic
-│   ├── middleware/     # Custom middleware
-│   └── utils/          # Utility functions
-├── routes/             # API routes
-├── migrations/         # Database migrations
-├── seeds/             # Database seeds
-└── db.js              # Database configuration
-```
+3. **API Connection Issues**
+   - Verify backend is running on port 3000
+   - Check frontend environment variables
+   - Ensure CORS is properly configured
 
 ## License
 
